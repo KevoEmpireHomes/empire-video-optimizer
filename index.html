@@ -5,800 +5,682 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Empire Homes — Video Optimizer</title>
 <style>
+
 *{box-sizing:border-box;margin:0;padding:0}
+
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f6f8;min-height:100vh;padding:24px 16px}
+
 .wrap{max-width:660px;margin:0 auto}
+
 .header{background:#003349;border-radius:12px;padding:18px 24px;display:flex;align-items:center;gap:16px;margin-bottom:24px}
+
 .header svg{width:90px;flex-shrink:0;filter:brightness(0) invert(1)}
+
 .header-divider{border-left:1px solid rgba(255,255,255,0.2);padding-left:16px}
+
 .header-title{color:#fff;font-size:15px;font-weight:600;margin-bottom:2px}
+
 .header-sub{color:rgba(255,255,255,0.6);font-size:13px}
+
 .card{background:#fff;border-radius:12px;border:1px solid #e0e4e8;padding:20px 22px;margin-bottom:16px}
+
 .drop{border:2px dashed #ccd2d8;border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:all 0.15s;background:#fafbfc;position:relative}
+
 .drop:hover,.drop.over{border-color:#e06344;background:#fff5f2}
-.drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+
 .drop-icon{font-size:40px;margin-bottom:10px;pointer-events:none}
+
 .drop-title{font-size:15px;font-weight:500;color:#003349;margin-bottom:4px;pointer-events:none}
+
 .drop-sub{font-size:13px;color:#888;pointer-events:none}
+
 .meta-bar{background:#f0f5ff;border:1px solid #c8d8f0;border-radius:8px;padding:10px 14px;font-size:13px;color:#003349;margin-top:12px;display:none}
+
 .section-label{font-size:12px;font-weight:600;color:#003349;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+
 .presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:16px}
+
 .preset-btn{padding:10px 12px;border-radius:8px;border:1.5px solid #e0e4e8;background:#fff;cursor:pointer;text-align:left;transition:all 0.12s}
+
 .preset-btn:hover{border-color:#e06344}
+
 .preset-btn.active{border-color:#e06344;background:#fff5f2}
+
 .preset-name{font-size:13px;font-weight:500;color:#003349}
+
 .preset-btn.active .preset-name{color:#e06344}
+
 .preset-desc{font-size:11px;color:#999;margin-top:2px}
+
 .custom-dims{display:none;gap:12px;margin-bottom:16px}
+
 .custom-dims.show{display:flex}
+
 .field{flex:1}
+
 .field label{display:block;font-size:12px;color:#666;margin-bottom:4px}
+
 .field input[type=number]{width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none}
+
 .field input[type=number]:focus{border-color:#e06344}
+
 .quality-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+
 .quality-label{font-size:13px;font-weight:500;color:#003349}
+
 .quality-val{font-size:13px;color:#666}
+
 input[type=range]{width:100%;accent-color:#e06344;margin-bottom:4px}
+
 .quality-hints{display:flex;justify-content:space-between;font-size:11px;color:#aaa}
+
 .plan-box{background:#f0f7ff;border:1px solid #c8dff4;border-radius:8px;padding:11px 14px;font-size:13px;margin-bottom:16px;display:none;color:#555}
+
 .plan-box strong{color:#003349}
+
 .compress-btn{width:100%;padding:14px;background:#e06344;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.15s}
+
 .compress-btn:hover{background:#c9512e}
+
 .compress-btn:disabled{background:#ccc;cursor:not-allowed}
+
 .progress-wrap{display:none;margin-top:16px}
+
 .progress-label{font-size:13px;color:#555;margin-bottom:6px;text-align:center}
+
 .progress-bar-bg{background:#e8ecf0;border-radius:99px;height:10px;overflow:hidden}
+
 .progress-bar-fill{height:100%;background:#e06344;border-radius:99px;width:0%;transition:width 0.4s}
+
 .progress-log{font-size:11px;color:#999;margin-top:6px;text-align:center;font-family:monospace;min-height:16px}
+
 .result-box{display:none;background:#edfaf3;border:1px solid #b2e5cc;border-radius:10px;padding:16px 20px;margin-top:16px}
+
 .result-title{font-size:15px;font-weight:600;color:#0a5c36;margin-bottom:4px}
+
 .result-sub{font-size:13px;color:#2c7a50;margin-bottom:12px}
+
 .dl-btn{display:inline-block;background:#003349;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none}
+
 .dl-btn:hover{background:#00293a}
+
 .error-box{display:none;background:#fff0f0;border:1px solid #f5c1c1;border-radius:10px;padding:14px 16px;margin-top:16px;font-size:13px;color:#a32d2d;line-height:1.5}
+
 .ffcmd-card{background:#f8f8f8;border:1px solid #e0e0e0;border-radius:10px;padding:14px 16px;margin-top:16px}
+
 .ffcmd-title{font-size:13px;font-weight:600;color:#003349;margin-bottom:6px}
+
 .ffcmd-code{background:#1e1e2e;color:#cdd6f4;padding:12px 14px;border-radius:8px;font-size:12px;font-family:monospace;white-space:pre-wrap;word-break:break-all;line-height:1.6}
+
 .ffcmd-note{font-size:11px;color:#999;margin-top:6px}
+
 .footer{text-align:center;font-size:11px;color:#aaa;margin-top:24px;padding-bottom:8px}
-.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;margin-left:8px;vertical-align:middle}
-.badge-ok{background:#edfaf3;color:#0a5c36}
-.badge-loading{background:#fff5f2;color:#c9512e}
 </style>
 </head>
 <body>
 <div class="wrap">
-
+ 
   <div class="header">
-    <svg viewBox="0 0 196 99" xmlns="http://www.w3.org/2000/svg">
-      <path d="m119.239 92.1674h-7.426v6.5069h-2.701v-15.4741h2.701v6.531h7.426v-6.531h2.7v15.4741h-2.7z" fill="currentColor"/>
-      <path d="m125.108 90.9385c0-4.5964 3.465-7.9639 7.829-7.9639 4.365 0 7.808 3.3675 7.808 7.9639s-3.443 7.9638-7.808 7.9638c-4.364 0-7.829-3.3218-7.829-7.9638zm7.829 5.4844c2.632 0 4.996-2.0257 4.996-5.4844s-2.361-5.4845-4.996-5.4845c-2.634 0-5.041 2.0258-5.041 5.4845s2.407 5.4844 5.041 5.4844z" fill="currentColor"/>
-      <path d="m162.791 83.2026h9.517v2.4338h-6.819v4.0732h5.715v2.321h-5.715v4.2099h6.819v2.4338h-9.517z" fill="currentColor"/>
-      <path d="m181.305 89.7096c-1.621-.6841-3.15-1.1833-3.15-2.525 0-.9553.833-1.7738 2.317-1.7738 1.148 0 2.447.3841 3.69 1.1737v-2.813c-1.035-.4992-2.451-.7969-3.6-.7969-3.194 0-5.086 1.8194-5.086 4.3684s1.666 3.5739 4.163 4.6204c1.597.7056 2.969 1.1833 2.969 2.5034 0 1.1617-.99 1.9561-2.497 1.9561-1.405 0-3.311-.6792-4.659-1.8577v2.8586c1.417.9793 2.969 1.433 4.614 1.433 2.902 0 5.197-1.6394 5.197-4.5508 0-2.5947-1.865-3.7083-3.958-4.5964z" fill="currentColor"/>
-      <path d="m157.596 83.2027-6.1 7.5534h-.045l-6.277-7.5534h-1.26v15.4741h2.632v-9.9224l4.68 5.53h.382l4.545-5.5084v9.9008h2.679v-15.4741z" fill="currentColor"/>
-      <path d="m.00243375 13.1409v-12.238556l8.46075625 3.369876v8.86868z" fill="#e06344"/>
-      <path d="m31.795 13.141v-12.238631l-8.4608 3.369871v8.86876z" fill="#e06344"/>
-      <path d="m11.6671 13.141v-8.86876l4.2316-3.369871 4.2292 3.369871v8.86876z" fill="#e06344"/>
-      <g fill="currentColor">
-        <path d="m0 22.3241h31.7973v8.1343h-22.77645v13.6067h19.09305v7.755h-19.09305v14.0628h22.77645v8.1343h-31.7973z"/>
-        <path d="m36.3349 39.884h8.57v4.4091c2.48-3.1922 5.6365-5.0932 9.8467-5.0932 3.9848 0 7.8936 1.6729 9.8468 5.6261 3.0069-3.8764 6.4648-5.6261 10.974-5.6261 5.7885 0 11.3515 3.4203 11.3515 12.0874v22.7299h-8.57v-20.9058c0-4.7884-2.7055-6.3101-5.5629-6.3101-2.8575 0-5.2616 1.7474-6.8399 4.6372v22.5787h-8.5699v-20.9058c0-4.7884-2.7055-6.3101-5.487-6.3101-3.007 0-5.4871 1.901-6.9917 4.942v22.2739h-8.5699z"/>
-        <path d="m137.415 39.8839h-8.569v34.1332h8.569z"/>
-        <path d="m141.956 39.8839h8.57v6.0821c2.781-4.7884 8.268-7.1453 13.155-6.0821v8.0575c-5.036-1.0633-10.073 1.2169-13.155 5.6261v20.4496h-8.57z"/>
-        <path d="m193.245 64.8532c-3.033 1.5361-6.536 2.6282-9.871 2.6282-6.313 0-10.523-3.041-11.351-8.8183h23.602c.301-1.4449.375-2.8898.375-4.3324 0-7.9062-5.637-15.1284-15.26-15.1284-9.624 0-17.064 7.527-17.064 17.7135 0 11.0241 8.192 17.8646 17.966 17.8646 3.899 0 8.864-1.1761 11.6-2.8034v-7.1214zm-12.579-18.8847c4.661 0 7.592 3.269 7.742 7.1453h-16.162c.978-4.4859 4.06-7.1453 8.42-7.1453z"/>
-        <path d="m109.655 39.1999c-4.359 0-7.366 2.0522-9.8465 5.398v-4.7139h-8.3445v49.4272l8.57 3.4131v-21.6714c1.728 1.9754 4.811 3.7251 9.32 3.7251 9.697 0 16.086-8.4391 16.086-17.7878 0-9.3488-6.541-17.7903-15.785-17.7903zm-1.953 27.8231c-3.382 0-6.163-1.7474-7.668-4.3324v-11.0985c1.578-2.813 4.509-4.714 7.668-4.714 4.811 0 9.021 4.1812 9.021 10.1097 0 5.9284-4.21 10.0352-9.021 10.0352z"/>
-        <path d="m128.846 29.8031v5.4893h8.569v-8.9z"/>
-      </g>
-    </svg>
-    <div class="header-divider">
-      <div class="header-title">Video Optimizer</div>
-      <div class="header-sub">Resize &amp; compress listing videos — runs entirely in your browser</div>
-    </div>
-  </div>
-
+<svg viewBox="0 0 196 99" xmlns="http://www.w3.org/2000/svg">
+<path d="m119.239 92.1674h-7.426v6.5069h-2.701v-15.4741h2.701v6.531h7.426v-6.531h2.7v15.4741h-2.7z" fill="currentColor"/>
+<path d="m125.108 90.9385c0-4.5964 3.465-7.9639 7.829-7.9639 4.365 0 7.808 3.3675 7.808 7.9639s-3.443 7.9638-7.808 7.9638c-4.364 0-7.829-3.3218-7.829-7.9638zm7.829 5.4844c2.632 0 4.996-2.0257 4.996-5.4844s-2.361-5.4845-4.996-5.4845c-2.634 0-5.041 2.0258-5.041 5.4845s2.407 5.4844 5.041 5.4844z" fill="currentColor"/>
+<path d="m162.791 83.2026h9.517v2.4338h-6.819v4.0732h5.715v2.321h-5.715v4.2099h6.819v2.4338h-9.517z" fill="currentColor"/>
+<path d="m181.305 89.7096c-1.621-.6841-3.15-1.1833-3.15-2.525 0-.9553.833-1.7738 2.317-1.7738 1.148 0 2.447.3841 3.69 1.1737v-2.813c-1.035-.4992-2.451-.7969-3.6-.7969-3.194 0-5.086 1.8194-5.086 4.3684s1.666 3.5739 4.163 4.6204c1.597.7056 2.969 1.1833 2.969 2.5034 0 1.1617-.99 1.9561-2.497 1.9561-1.405 0-3.311-.6792-4.659-1.8577v2.8586c1.417.9793 2.969 1.433 4.614 1.433 2.902 0 5.197-1.6394 5.197-4.5508 0-2.5947-1.865-3.7083-3.958-4.5964z" fill="currentColor"/>
+<path d="m157.596 83.2027-6.1 7.5534h-.045l-6.277-7.5534h-1.26v15.4741h2.632v-9.9224l4.68 5.53h.382l4.545-5.5084v9.9008h2.679v-15.4741z" fill="currentColor"/>
+<path d="m.00243375 13.1409v-12.238556l8.46075625 3.369876v8.86868z" fill="#e06344"/>
+<path d="m31.795 13.141v-12.238631l-8.4608 3.369871v8.86876z" fill="#e06344"/>
+<path d="m11.6671 13.141v-8.86876l4.2316-3.369871 4.2292 3.369871v8.86876z" fill="#e06344"/>
+<g fill="currentColor">
+<path d="m0 22.3241h31.7973v8.1343h-22.77645v13.6067h19.09305v7.755h-19.09305v14.0628h22.77645v8.1343h-31.7973z"/>
+<path d="m36.3349 39.884h8.57v4.4091c2.48-3.1922 5.6365-5.0932 9.8467-5.0932 3.9848 0 7.8936 1.6729 9.8468 5.6261 3.0069-3.8764 6.4648-5.6261 10.974-5.6261 5.7885 0 11.3515 3.4203 11.3515 12.0874v22.7299h-8.57v-20.9058c0-4.7884-2.7055-6.3101-5.5629-6.3101-2.8575 0-5.2616 1.7474-6.8399 4.6372v22.5787h-8.5699v-20.9058c0-4.7884-2.7055-6.3101-5.487-6.3101-3.007 0-5.4871 1.901-6.9917 4.942v22.2739h-8.5699z"/>
+<path d="m137.415 39.8839h-8.569v34.1332h8.569z"/>
+<path d="m141.956 39.8839h8.57v6.0821c2.781-4.7884 8.268-7.1453 13.155-6.0821v8.0575c-5.036-1.0633-10.073 1.2169-13.155 5.6261v20.4496h-8.57z"/>
+<path d="m193.245 64.8532c-3.033 1.5361-6.536 2.6282-9.871 2.6282-6.313 0-10.523-3.041-11.351-8.8183h23.602c.301-1.4449.375-2.8898.375-4.3324 0-7.9062-5.637-15.1284-15.26-15.1284-9.624 0-17.064 7.527-17.064 17.7135 0 11.0241 8.192 17.8646 17.966 17.8646 3.899 0 8.864-1.1761 11.6-2.8034v-7.1214zm-12.579-18.8847c4.661 0 7.592 3.269 7.742 7.1453h-16.162c.978-4.4859 4.06-7.1453 8.42-7.1453z"/>
+<path d="m109.655 39.1999c-4.359 0-7.366 2.0522-9.8465 5.398v-4.7139h-8.3445v49.4272l8.57 3.4131v-21.6714c1.728 1.9754 4.811 3.7251 9.32 3.7251 9.697 0 16.086-8.4391 16.086-17.7878 0-9.3488-6.541-17.7903-15.785-17.7903zm-1.953 27.8231c-3.382 0-6.163-1.7474-7.668-4.3324v-11.0985c1.578-2.813 4.509-4.714 7.668-4.714 4.811 0 9.021 4.1812 9.021 10.1097 0 5.9284-4.21 10.0352-9.021 10.0352z"/>
+<path d="m128.846 29.8031v5.4893h8.569v-8.9z"/>
+</g>
+</svg>
+<div class="header-divider">
+<div class="header-title">Video Optimizer</div>
+<div class="header-sub">Resize &amp; compress listing videos — runs entirely in your browser</div>
+</div>
+</div>
+ 
   <div class="card">
-    <div class="drop" id="dropZone">
-      <input type="file" id="fileInput" accept="video/*"/>
-      <div class="drop-icon">🎬</div>
-      <div class="drop-title" id="dropTitle">Drop a video here or click to browse</div>
-      <div class="drop-sub" id="dropSub">MP4, MOV, AVI, MKV — your file never leaves your computer</div>
-    </div>
-    <div class="meta-bar" id="metaBar">
+<div class="drop" id="dropZone">
+<input type="file" id="fileInput" accept="video/*" style="display:none"/>
+<div class="drop-icon">🎬</div>
+<div class="drop-title" id="dropTitle">Drop a video here or click to browse</div>
+<div class="drop-sub" id="dropSub">MP4, MOV, AVI, MKV — your file never leaves your computer</div>
+</div>
+<div class="meta-bar" id="metaBar">
+
       📐 <strong id="metaDims">—</strong> &nbsp;·&nbsp;
+
       💾 <strong id="metaSize">—</strong> &nbsp;·&nbsp;
+
       ⏱ <strong id="metaDur">—</strong>
-    </div>
-  </div>
-
+</div>
+</div>
+ 
   <div class="card">
-    <div class="section-label">Output preset</div>
-    <div class="presets">
-      <button class="preset-btn active" data-w="1280" data-h="720" data-crf="28">
-        <div class="preset-name">Web / Email</div>
-        <div class="preset-desc">1280×720 · MLS &amp; email</div>
-      </button>
-      <button class="preset-btn" data-w="1920" data-h="1080" data-crf="26">
-        <div class="preset-name">Social 1080p</div>
-        <div class="preset-desc">1920×1080 · YouTube, FB</div>
-      </button>
-      <button class="preset-btn" data-w="1080" data-h="1080" data-crf="26">
-        <div class="preset-name">Square 1:1</div>
-        <div class="preset-desc">1080×1080 · Instagram</div>
-      </button>
-      <button class="preset-btn" data-w="" data-h="" data-crf="23">
-        <div class="preset-name">Compress only</div>
-        <div class="preset-desc">Keep original size</div>
-      </button>
-      <button class="preset-btn" data-w="custom" data-h="custom" data-crf="23">
-        <div class="preset-name">Custom</div>
-        <div class="preset-desc">Set your own size</div>
-      </button>
-    </div>
-
+<div class="section-label">Output preset</div>
+<div class="presets" id="presets">
+<button class="preset-btn active" data-w="1280" data-h="720" data-crf="28">
+<div class="preset-name">Web / Email</div>
+<div class="preset-desc">1280×720 · MLS &amp; email</div>
+</button>
+<button class="preset-btn" data-w="1920" data-h="1080" data-crf="26">
+<div class="preset-name">Social 1080p</div>
+<div class="preset-desc">1920×1080 · YouTube, FB</div>
+</button>
+<button class="preset-btn" data-w="1080" data-h="1080" data-crf="26">
+<div class="preset-name">Square 1:1</div>
+<div class="preset-desc">1080×1080 · Instagram</div>
+</button>
+<button class="preset-btn" data-w="" data-h="" data-crf="23">
+<div class="preset-name">Compress only</div>
+<div class="preset-desc">Keep original size</div>
+</button>
+<button class="preset-btn" data-w="custom" data-h="custom" data-crf="23">
+<div class="preset-name">Custom</div>
+<div class="preset-desc">Set your own size</div>
+</button>
+</div>
+ 
     <div class="custom-dims" id="customDims">
-      <div class="field">
-        <label>Width (px)</label>
-        <input type="number" id="customW" placeholder="e.g. 1280"/>
-      </div>
-      <div class="field">
-        <label>Height (px)</label>
-        <input type="number" id="customH" placeholder="e.g. 720"/>
-      </div>
-    </div>
-
+<div class="field">
+<label>Width (px)</label>
+<input type="number" id="customW" placeholder="e.g. 1280"/>
+</div>
+<div class="field">
+<label>Height (px)</label>
+<input type="number" id="customH" placeholder="e.g. 720"/>
+</div>
+</div>
+ 
     <div class="quality-row">
-      <span class="quality-label">Quality</span>
-      <span class="quality-val" id="qualityVal">Balanced (CRF 28)</span>
-    </div>
-    <input type="range" id="crfSlider" min="18" max="35" step="1" value="28"/>
-    <div class="quality-hints"><span>← Best quality</span><span>Smallest file →</span></div>
-  </div>
-
-  <div class="plan-box" id="planBox"></div>
-
+<span class="quality-label">Quality</span>
+<span class="quality-val" id="qualityVal">Balanced (CRF 28)</span>
+</div>
+<input type="range" id="crfSlider" min="18" max="35" step="1" value="28"/>
+<div class="quality-hints"><span>← Best quality</span><span>Smallest file →</span></div>
+</div>
+ 
+  <div class="plan-box" id="planBox"><strong id="planText">—</strong></div>
+ 
   <button class="compress-btn" id="compressBtn" disabled>Select a video to begin</button>
-
+ 
   <div class="progress-wrap" id="progressWrap">
-    <div class="progress-label" id="progressLabel">Processing…</div>
-    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
-    <div class="progress-log" id="progressLog"></div>
-  </div>
-
+<div class="progress-label" id="progressLabel">Processing…</div>
+<div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+<div class="progress-log" id="progressLog"></div>
+</div>
+ 
   <div class="result-box" id="resultBox">
-    <div class="result-title">✅ Done!</div>
-    <div class="result-sub" id="resultSub"></div>
-    <button class="dl-btn" id="dlBtn">⬇ Download compressed video</button>
-  </div>
-
+<div class="result-title">✅ Done!</div>
+<div class="result-sub" id="resultSub"></div>
+<button class="dl-btn" id="dlBtn">⬇ Download compressed video</button>
+</div>
+ 
   <div class="error-box" id="errorBox"></div>
-
+ 
   <div class="ffcmd-card">
-    <div class="ffcmd-title">💻 Prefer the command line? Copy this ffmpeg command:</div>
-    <div class="ffcmd-code" id="ffCmd">ffmpeg -i "input.mp4" -vf scale=1280:720 -c:v libx264 -crf 28 -preset slow -c:a aac -b:a 128k -movflags +faststart "output.mp4"</div>
-    <div class="ffcmd-note">Free download at <strong>ffmpeg.org</strong> — updates automatically as you change settings above.</div>
-  </div>
-
+<div class="ffcmd-title">💻 Prefer the command line? Copy this ffmpeg command:</div>
+<div class="ffcmd-code" id="ffCmd">ffmpeg -i "input.mp4" -vf scale=1280:720 -c:v libx264 -crf 28 -preset fast -c:a aac -b:a 128k -movflags +faststart "output.mp4"</div>
+<div class="ffcmd-note">Free download at <strong>ffmpeg.org</strong> — updates automatically as you change settings above.</div>
+</div>
+ 
   <div class="footer">Empire Homes · Video Optimizer · Processing happens entirely in your browser — videos are never uploaded anywhere</div>
 </div>
-
+ 
+<!-- ffmpeg.wasm engine (this UMD bundle is browser-ready and defines FFmpegWASM) -->
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
+<!-- @ffmpeg/util's published UMD build is broken in browsers (it uses require()), so we define the two helpers we need inline instead -->
 <script>
-// ── State ──────────────────────────────────────────────────────────────
-var videoFile = null;
-var videoMeta = {w:0, h:0, size:0, dur:0, name:''};
-var outputBlob = null;
-var crfValue = 28;
-var isCustom = false;
-var targetW = 1280, targetH = 720;
-var ffmpegReady = false;
-var ffmpegLoading = false;
-var ffmpegInstance = null;
 
-// ── Helpers ────────────────────────────────────────────────────────────
-function fmt(bytes) {
-  if (!bytes) return '—';
-  return bytes < 1048576 ? (bytes/1024).toFixed(1)+' KB' : (bytes/1048576).toFixed(1)+' MB';
-}
-function fmtDur(s) {
-  if (!s || isNaN(s)) return '—';
-  var m = Math.floor(s/60), sec = Math.round(s%60);
-  return m > 0 ? m+'m '+sec+'s' : sec+'s';
-}
-function el(id){ return document.getElementById(id); }
+window.FFmpegUtil = {
 
-// ── File handling ──────────────────────────────────────────────────────
-el('dropZone').addEventListener('dragover', function(e){ e.preventDefault(); el('dropZone').classList.add('over'); });
-el('dropZone').addEventListener('dragleave', function(){ el('dropZone').classList.remove('over'); });
-el('dropZone').addEventListener('drop', function(e){ e.preventDefault(); el('dropZone').classList.remove('over'); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
-el('fileInput').addEventListener('change', function(e){ if(e.target.files[0]) handleFile(e.target.files[0]); });
+  // Read a File/Blob (or fetch a URL) into a Uint8Array — what ffmpeg.writeFile needs
 
-function handleFile(f) {
-  if (!f.type.startsWith('video/') && !f.name.match(/\.(mp4|mov|avi|mkv|webm|m4v)$/i)) {
-    showError('Please select a video file (MP4, MOV, AVI, MKV, etc.)');
-    return;
-  }
-  videoFile = f;
-  videoMeta.size = f.size;
-  videoMeta.name = f.name;
-  el('dropTitle').textContent = f.name;
-  el('dropSub').textContent = fmt(f.size) + ' — reading video info…';
-  el('resultBox').style.display = 'none';
-  el('errorBox').style.display = 'none';
-  el('progressWrap').style.display = 'none';
+  fetchFile: async (file) => {
 
-  var url = URL.createObjectURL(f);
-  var v = document.createElement('video');
-  v.preload = 'metadata';
-  v.onloadedmetadata = function() {
-    videoMeta.w = v.videoWidth;
-    videoMeta.h = v.videoHeight;
-    videoMeta.dur = v.duration;
-    URL.revokeObjectURL(url);
-    el('metaDims').textContent = videoMeta.w + '×' + videoMeta.h;
-    el('metaSize').textContent = fmt(videoMeta.size);
-    el('metaDur').textContent = fmtDur(videoMeta.dur);
-    el('metaBar').style.display = 'block';
-    el('dropSub').textContent = videoMeta.w+'×'+videoMeta.h+' · '+fmt(videoMeta.size)+' · '+fmtDur(videoMeta.dur);
-    updateUI();
-  };
-  v.onerror = function() {
-    URL.revokeObjectURL(url);
-    el('dropSub').textContent = fmt(f.size) + ' — could not read dimensions';
-    updateUI();
-  };
-  v.src = url;
-}
+    if (file instanceof File || file instanceof Blob) {
 
-// ── Presets ────────────────────────────────────────────────────────────
-document.querySelectorAll('.preset-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.preset-btn').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    var w = btn.dataset.w, h = btn.dataset.h;
-    isCustom = (w === 'custom');
-    el('customDims').classList.toggle('show', isCustom);
-    if (!isCustom) {
-      targetW = w ? parseInt(w) : null;
-      targetH = h ? parseInt(h) : null;
-      crfValue = parseInt(btn.dataset.crf);
-      el('crfSlider').value = crfValue;
-      updateQualityLabel();
-    }
-    updateUI();
-  });
-});
+      return new Uint8Array(await file.arrayBuffer());
 
-el('crfSlider').addEventListener('input', function(e) {
-  crfValue = parseInt(e.target.value);
-  updateQualityLabel();
-  updateUI();
-});
-
-el('customW').addEventListener('input', updateUI);
-el('customH').addEventListener('input', updateUI);
-
-function updateQualityLabel() {
-  var label = crfValue <= 20 ? 'High quality' : crfValue <= 26 ? 'Balanced' : 'Smaller file';
-  el('qualityVal').textContent = label + ' (CRF ' + crfValue + ')';
-}
-
-function getDims() {
-  if (isCustom) {
-    return { w: parseInt(el('customW').value)||null, h: parseInt(el('customH').value)||null };
-  }
-  return { w: targetW, h: targetH };
-}
-
-function updateUI() {
-  var dims = getDims();
-  var w = dims.w, h = dims.h;
-
-  if (videoFile) {
-    el('planBox').style.display = 'block';
-    var dimStr = (w && h) ? videoMeta.w+'×'+videoMeta.h+' → '+w+'×'+h : videoMeta.w+'×'+videoMeta.h+' (no resize)';
-    el('planBox').innerHTML = '<strong>' + dimStr + '</strong> &nbsp;·&nbsp; CRF ' + crfValue + ' quality &nbsp;·&nbsp; H.264 + AAC';
-    el('compressBtn').disabled = false;
-    el('compressBtn').textContent = 'Compress video';
-  } else {
-    el('planBox').style.display = 'none';
-    el('compressBtn').disabled = true;
-    el('compressBtn').textContent = 'Select a video to begin';
-  }
-
-  var inName = videoFile ? '"' + videoFile.name + '"' : '"input.mp4"';
-  var outBase = videoFile ? videoFile.name.replace(/\.[^.]+$/, '') : 'output';
-  var outName = '"compressed_' + outBase + '.mp4"';
-  var scaleArg = (w && h) ? '-vf scale='+w+':'+h+' ' : '';
-  el('ffCmd').textContent = 'ffmpeg -i '+inName+' '+scaleArg+'-c:v libx264 -crf '+crfValue+' -preset slow -c:a aac -b:a 128k -movflags +faststart '+outName;
-}
-
-function showError(msg) {
-  el('errorBox').style.display = 'block';
-  el('errorBox').innerHTML = msg;
-}
-
-// ── Compression ────────────────────────────────────────────────────────
-el('compressBtn').addEventListener('click', function() {
-  if (!videoFile) return;
-  startCompress();
-});
-
-function startCompress() {
-  el('compressBtn').disabled = true;
-  el('resultBox').style.display = 'none';
-  el('errorBox').style.display = 'none';
-  el('progressWrap').style.display = 'block';
-  el('progressFill').style.width = '0%';
-  el('progressLog').textContent = '';
-  el('progressLabel').textContent = 'Loading compression engine…';
-  el('compressBtn').textContent = '⏳ Loading…';
-
-  // Dynamically load ffmpeg.wasm only when needed
-  if (typeof FFmpegWASM === 'undefined') {
-    loadScript('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js', function(err) {
-      if (err) {
-        // Fallback to unpkg
-        loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js', function(err2) {
-          if (err2) {
-            showFallback();
-          } else {
-            initFFmpeg();
-          }
-        });
-      } else {
-        initFFmpeg();
-      }
-    });
-  } else {
-    initFFmpeg();
-  }
-}
-
-function loadScript(src, cb) {
-  var s = document.createElement('script');
-  s.src = src;
-  s.onload = function(){ cb(null); };
-  s.onerror = function(){ cb(new Error('Failed to load ' + src)); };
-  document.head.appendChild(s);
-}
-
-async function initFFmpeg() {
-  try {
-    el('progressLabel').textContent = 'Initializing engine (first time takes ~15 seconds)…';
-    el('progressFill').style.width = '5%';
-
-    var FFmpeg = FFmpegWASM.FFmpeg;
-    var fetchFile = FFmpegUtil.fetchFile;
-    var toBlobURL = FFmpegUtil.toBlobURL;
-
-    if (!ffmpegInstance) {
-      ffmpegInstance = new FFmpeg();
-      ffmpegInstance.on('log', function(ref) {
-        var message = ref.message;
-        el('progressLog').textContent = message.slice(0, 100);
-        var m = message.match(/time=(\d+):(\d+):([\d.]+)/);
-        if (m && videoMeta.dur > 0) {
-          var elapsed = parseInt(m[1])*3600 + parseInt(m[2])*60 + parseFloat(m[3]);
-          var pct = Math.min(94, Math.round((elapsed / videoMeta.dur) * 100));
-          el('progressFill').style.width = pct + '%';
-          el('progressLabel').textContent = 'Compressing… ' + pct + '%';
-          el('compressBtn').textContent = '⏳ ' + pct + '%';
-        }
-      });
-
-      var baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
-      await ffmpegInstance.load({
-        coreURL: await toBlobURL(baseURL + '/ffmpeg-core.js', 'text/javascript'),
-        wasmURL: await toBlobURL(baseURL + '/ffmpeg-core.wasm', 'application/wasm'),
-      });
     }
 
-    el('progressLabel').textContent = 'Reading video file…';
-    el('progressFill').style.width = '10%';
+    return new Uint8Array(await (await fetch(file)).arrayBuffer());
 
-    var ext = (videoFile.name.split('.').pop() || 'mp4').toLowerCase();
-    var inName = 'input.' + ext;
-    var outName = 'output.mp4';
-    var dims = getDims();
+  },
 
-    await ffmpegInstance.writeFile(inName, await fetchFile(videoFile));
+  // Fetch a URL and hand back a blob: URL — used to load the ffmpeg core
 
-    var args = ['-i', inName];
-    if (dims.w && dims.h) args.push('-vf', 'scale=' + dims.w + ':' + dims.h);
-    args.push('-c:v', 'libx264', '-crf', String(crfValue), '-preset', 'fast', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', outName);
+  toBlobURL: async (url, mimeType) => {
 
-    el('progressLabel').textContent = 'Compressing… (1–3 min for large files, please wait)';
-    await ffmpegInstance.exec(args);
+    const buf = await (await fetch(url)).arrayBuffer();
 
-    el('progressFill').style.width = '100%';
-    el('progressLabel').textContent = 'Done!';
+    return URL.createObjectURL(new Blob([buf], { type: mimeType }));
 
-    var data = await ffmpegInstance.readFile(outName);
-    var blob = new Blob([data.buffer], { type: 'video/mp4' });
-    outputBlob = blob;
-
-    await ffmpegInstance.deleteFile(inName);
-    await ffmpegInstance.deleteFile(outName);
-
-    var reduction = Math.round((1 - blob.size / videoFile.size) * 100);
-    var outDims = (dims.w && dims.h) ? dims.w + '×' + dims.h : videoMeta.w + '×' + videoMeta.h;
-    el('resultSub').textContent = fmt(videoFile.size) + ' → ' + fmt(blob.size) + ' · ' + reduction + '% smaller · ' + outDims;
-    el('resultBox').style.display = 'block';
-    el('progressWrap').style.display = 'none';
-    el('compressBtn').disabled = false;
-    el('compressBtn').textContent = 'Compress another';
-
-    el('dlBtn').onclick = function() {
-      var url = URL.createObjectURL(outputBlob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'compressed_' + videoFile.name.replace(/\.[^.]+$/, '') + '.mp4';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
-    };
-
-  } catch(err) {
-    console.error(err);
-    showFallback(err.message);
   }
-}
 
-function showFallback(errMsg) {
-  el('progressWrap').style.display = 'none';
-  el('compressBtn').disabled = false;
-  el('compressBtn').textContent = 'Compress video';
-  var msg = '<strong>Browser compression unavailable.</strong><br>';
-  if (errMsg) msg += 'Error: ' + errMsg + '<br><br>';
-  msg += 'Your browser may not support WebAssembly compression. <strong>Chrome works best.</strong><br><br>';
-  msg += 'Use the ffmpeg command at the bottom of the page instead — it takes 2 minutes to set up and gives you the same result.';
-  showError(msg);
-}
-
-// Init
-updateUI();
+};
 </script>
-</body>
-</html>  .progress-bar-bg{background:#e8ecf0;border-radius:99px;height:10px;overflow:hidden}
-  .progress-bar-fill{height:100%;background:#e06344;border-radius:99px;width:0%;transition:width 0.3s}
-  .progress-log{font-size:11px;color:#999;margin-top:6px;text-align:center;font-family:monospace}
-
-  .result-box{display:none;background:#edfaf3;border:1px solid #b2e5cc;border-radius:10px;padding:16px 20px;margin-top:16px}
-  .result-title{font-size:15px;font-weight:600;color:#0a5c36;margin-bottom:4px}
-  .result-sub{font-size:13px;color:#2c7a50;margin-bottom:12px}
-  .dl-btn{display:inline-block;background:#003349;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;text-decoration:none;cursor:pointer;border:none}
-  .dl-btn:hover{background:#00293a}
-
-  .error-box{display:none;background:#fff0f0;border:1px solid #f5c1c1;border-radius:10px;padding:14px 16px;margin-top:16px;font-size:13px;color:#a32d2d}
-
-  .ffcmd-card{background:#f8f8f8;border:1px solid #e0e0e0;border-radius:10px;padding:14px 16px;margin-top:16px}
-  .ffcmd-title{font-size:13px;font-weight:600;color:#003349;margin-bottom:6px}
-  .ffcmd-code{background:#1e1e2e;color:#cdd6f4;padding:12px 14px;border-radius:8px;font-size:12px;font-family:monospace;white-space:pre-wrap;word-break:break-all;line-height:1.6}
-  .ffcmd-note{font-size:11px;color:#999;margin-top:6px}
-
-  .footer{text-align:center;font-size:11px;color:#aaa;margin-top:24px}
-</style>
-</head>
-<body>
-<div class="wrap">
-
-  <div class="header">
-    <svg viewBox="0 0 196 99" xmlns="http://www.w3.org/2000/svg"><path d="m119.239 92.1674h-7.426v6.5069h-2.701v-15.4741h2.701v6.531h7.426v-6.531h2.7v15.4741h-2.7z" fill="currentColor"/><path d="m125.108 90.9385c0-4.5964 3.465-7.9639 7.829-7.9639 4.365 0 7.808 3.3675 7.808 7.9639s-3.443 7.9638-7.808 7.9638c-4.364 0-7.829-3.3218-7.829-7.9638zm7.829 5.4844c2.632 0 4.996-2.0257 4.996-5.4844s-2.361-5.4845-4.996-5.4845c-2.634 0-5.041 2.0258-5.041 5.4845s2.407 5.4844 5.041 5.4844z" fill="currentColor"/><path d="m162.791 83.2026h9.517v2.4338h-6.819v4.0732h5.715v2.321h-5.715v4.2099h6.819v2.4338h-9.517z" fill="currentColor"/><path d="m181.305 89.7096c-1.621-.6841-3.15-1.1833-3.15-2.525 0-.9553.833-1.7738 2.317-1.7738 1.148 0 2.447.3841 3.69 1.1737v-2.813c-1.035-.4992-2.451-.7969-3.6-.7969-3.194 0-5.086 1.8194-5.086 4.3684s1.666 3.5739 4.163 4.6204c1.597.7056 2.969 1.1833 2.969 2.5034 0 1.1617-.99 1.9561-2.497 1.9561-1.405 0-3.311-.6792-4.659-1.8577v2.8586c1.417.9793 2.969 1.433 4.614 1.433 2.902 0 5.197-1.6394 5.197-4.5508 0-2.5947-1.865-3.7083-3.958-4.5964z" fill="currentColor"/><path d="m157.596 83.2027-6.1 7.5534h-.045l-6.277-7.5534h-1.26v15.4741h2.632v-9.9224l4.68 5.53h.382l4.545-5.5084v9.9008h2.679v-15.4741z" fill="currentColor"/><path d="m.00243375 13.1409v-12.238556l8.46075625 3.369876v8.86868z" fill="#e06344"/><path d="m31.795 13.141v-12.238631l-8.4608 3.369871v8.86876z" fill="#e06344"/><path d="m11.6671 13.141v-8.86876l4.2316-3.369871 4.2292 3.369871v8.86876z" fill="#e06344"/><g fill="currentColor"><path d="m0 22.3241h31.7973v8.1343h-22.77645v13.6067h19.09305v7.755h-19.09305v14.0628h22.77645v8.1343h-31.7973z"/><path d="m36.3349 39.884h8.57v4.4091c2.48-3.1922 5.6365-5.0932 9.8467-5.0932 3.9848 0 7.8936 1.6729 9.8468 5.6261 3.0069-3.8764 6.4648-5.6261 10.974-5.6261 5.7885 0 11.3515 3.4203 11.3515 12.0874v22.7299h-8.57v-20.9058c0-4.7884-2.7055-6.3101-5.5629-6.3101-2.8575 0-5.2616 1.7474-6.8399 4.6372v22.5787h-8.5699v-20.9058c0-4.7884-2.7055-6.3101-5.487-6.3101-3.007 0-5.4871 1.901-6.9917 4.942v22.2739h-8.5699z"/><path d="m137.415 39.8839h-8.569v34.1332h8.569z"/><path d="m141.956 39.8839h8.57v6.0821c2.781-4.7884 8.268-7.1453 13.155-6.0821v8.0575c-5.036-1.0633-10.073 1.2169-13.155 5.6261v20.4496h-8.57z"/><path d="m193.245 64.8532c-3.033 1.5361-6.536 2.6282-9.871 2.6282-6.313 0-10.523-3.041-11.351-8.8183h23.602c.301-1.4449.375-2.8898.375-4.3324 0-7.9062-5.637-15.1284-15.26-15.1284-9.624 0-17.064 7.527-17.064 17.7135 0 11.0241 8.192 17.8646 17.966 17.8646 3.899 0 8.864-1.1761 11.6-2.8034v-7.1214zm-12.579-18.8847c4.661 0 7.592 3.269 7.742 7.1453h-16.162c.978-4.4859 4.06-7.1453 8.42-7.1453z"/><path d="m109.655 39.1999c-4.359 0-7.366 2.0522-9.8465 5.398v-4.7139h-8.3445v49.4272l8.57 3.4131v-21.6714c1.728 1.9754 4.811 3.7251 9.32 3.7251 9.697 0 16.086-8.4391 16.086-17.7878 0-9.3488-6.541-17.7903-15.785-17.7903zm-1.953 27.8231c-3.382 0-6.163-1.7474-7.668-4.3324v-11.0985c1.578-2.813 4.509-4.714 7.668-4.714 4.811 0 9.021 4.1812 9.021 10.1097 0 5.9284-4.21 10.0352-9.021 10.0352z"/><path d="m128.846 29.8031v5.4893h8.569v-8.9z"/></g></svg>
-    <div class="header-divider">
-      <div class="header-title">Video Optimizer</div>
-      <div class="header-sub">Resize &amp; compress listing videos — no upload, runs in your browser</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="drop" id="dropZone">
-      <input type="file" id="fileInput" accept="video/*" style="display:none"/>
-      <div class="drop-icon">🎬</div>
-      <div class="drop-title" id="dropTitle">Drop a video here or click to browse</div>
-      <div class="drop-sub" id="dropSub">MP4, MOV, AVI, MKV — your file never leaves your computer</div>
-    </div>
-    <div class="meta-bar" id="metaBar">
-      📐 <strong id="metaDims">—</strong>
-      <span>·</span> <strong id="metaSize">—</strong>
-      <span>·</span> <strong id="metaDur">—</strong>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="section-label">Output preset</div>
-    <div class="presets" id="presets">
-      <button class="preset-btn active" data-w="1280" data-h="720" data-crf="28">
-        <div class="preset-name">Web / Email</div>
-        <div class="preset-desc">1280×720 · MLS &amp; email</div>
-      </button>
-      <button class="preset-btn" data-w="1920" data-h="1080" data-crf="26">
-        <div class="preset-name">Social 1080p</div>
-        <div class="preset-desc">1920×1080 · YouTube, FB</div>
-      </button>
-      <button class="preset-btn" data-w="1080" data-h="1080" data-crf="26">
-        <div class="preset-name">Square 1:1</div>
-        <div class="preset-desc">1080×1080 · Instagram</div>
-      </button>
-      <button class="preset-btn" data-w="" data-h="" data-crf="23">
-        <div class="preset-name">Compress only</div>
-        <div class="preset-desc">Keep original size</div>
-      </button>
-      <button class="preset-btn" data-w="custom" data-h="custom" data-crf="23">
-        <div class="preset-name">Custom</div>
-        <div class="preset-desc">Set your own size</div>
-      </button>
-    </div>
-
-    <div class="custom-dims" id="customDims">
-      <div class="field">
-        <label>Width (px)</label>
-        <input type="number" id="customW" placeholder="e.g. 1280"/>
-      </div>
-      <div class="field">
-        <label>Height (px)</label>
-        <input type="number" id="customH" placeholder="e.g. 720"/>
-      </div>
-    </div>
-
-    <div class="quality-row">
-      <span class="quality-label">Quality</span>
-      <span class="quality-val" id="qualityVal">Balanced (CRF 28)</span>
-    </div>
-    <input type="range" id="crfSlider" min="18" max="35" step="1" value="28"/>
-    <div class="quality-hints"><span>← Best quality</span><span>Smallest file →</span></div>
-  </div>
-
-  <div class="plan-box" id="planBox">
-    <strong id="planText">—</strong>
-  </div>
-
-  <button class="compress-btn" id="compressBtn" disabled>Select a video to begin</button>
-
-  <div class="progress-wrap" id="progressWrap">
-    <div class="progress-label" id="progressLabel">Processing…</div>
-    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
-    <div class="progress-log" id="progressLog"></div>
-  </div>
-
-  <div class="result-box" id="resultBox">
-    <div class="result-title">✅ Done!</div>
-    <div class="result-sub" id="resultSub"></div>
-    <button class="dl-btn" id="dlBtn">⬇ Download compressed video</button>
-  </div>
-
-  <div class="error-box" id="errorBox"></div>
-
-  <div class="ffcmd-card">
-    <div class="ffcmd-title">💻 Prefer to run it yourself? Use this ffmpeg command:</div>
-    <div class="ffcmd-code" id="ffCmd">ffmpeg -i "input.mp4" -vf scale=1280:720 -c:v libx264 -crf 28 -preset slow -c:a aac -b:a 128k -movflags +faststart "output.mp4"</div>
-    <div class="ffcmd-note">Free download at <strong>ffmpeg.org</strong> — updates automatically as you change settings above.</div>
-  </div>
-
-  <div class="footer">Empire Homes · Video Optimizer · Powered by ffmpeg.wasm — processing happens entirely in your browser</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script><script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/umd/index.js"></script>
 <script>
+
 const { FFmpeg } = FFmpegWASM;
+
 const { fetchFile, toBlobURL } = FFmpegUtil;
-
+ 
 let ffmpeg = null;
+
 let videoFile = null;
+
 let videoMeta = { w: 0, h: 0, size: 0, dur: 0, name: '' };
+
 let outputBlob = null;
+
 let selectedPreset = { w: 1280, h: 720, crf: 28 };
+
 let isCustom = false;
-
+ 
 const $ = id => document.getElementById(id);
-
+ 
 function fmt(bytes) {
+
   if (!bytes) return '—';
+
   return bytes < 1048576 ? (bytes/1024).toFixed(1)+' KB' : (bytes/1048576).toFixed(1)+' MB';
+
 }
+
 function fmtDur(s) {
+
   if (!s) return '—';
+
   const m = Math.floor(s/60), sec = Math.round(s%60);
+
   return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
-}
 
+}
+ 
 // Drop zone
+
 const drop = $('dropZone');
+
 const fileInput = $('fileInput');
+
 drop.addEventListener('click', () => fileInput.click());
+
 drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+
 drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+
 drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); handleFile(e.dataTransfer.files[0]); });
+
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
+ 
 function handleFile(f) {
+
   if (!f) return;
+
+  if (!f.type.startsWith('video/') && !f.name.match(/\.(mp4|mov|avi|mkv|webm|m4v)$/i)) {
+
+    showError('Please select a video file (MP4, MOV, AVI, MKV, etc.)');
+
+    return;
+
+  }
+
   videoFile = f;
+
   videoMeta.size = f.size;
+
   videoMeta.name = f.name;
-  const url = URL.createObjectURL(f);
-  const v = document.createElement('video');
-  v.src = url;
-  v.onloadedmetadata = () => {
-    videoMeta.w = v.videoWidth;
-    videoMeta.h = v.videoHeight;
-    videoMeta.dur = v.duration;
-    URL.revokeObjectURL(url);
-    $('metaDims').textContent = `${videoMeta.w}×${videoMeta.h}`;
-    $('metaSize').textContent = fmt(videoMeta.size);
-    $('metaDur').textContent = fmtDur(videoMeta.dur);
-    $('metaBar').style.display = 'block';
-    $('dropTitle').textContent = f.name;
-    $('dropSub').textContent = `${videoMeta.w}×${videoMeta.h} · ${fmt(videoMeta.size)} · ${fmtDur(videoMeta.dur)}`;
-    updateUI();
-  };
-}
 
-// Presets
-document.querySelectorAll('.preset-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const w = btn.dataset.w, h = btn.dataset.h;
-    isCustom = w === 'custom';
-    $('customDims').classList.toggle('show', isCustom);
-    if (!isCustom) {
-      selectedPreset.w = w ? parseInt(w) : null;
-      selectedPreset.h = h ? parseInt(h) : null;
-      selectedPreset.crf = parseInt(btn.dataset.crf);
-      $('crfSlider').value = selectedPreset.crf;
-      updateQualityLabel();
-    }
-    updateUI();
-  });
-});
-
-// Quality slider
-$('crfSlider').addEventListener('input', e => {
-  selectedPreset.crf = parseInt(e.target.value);
-  updateQualityLabel();
-  updateUI();
-});
-
-function updateQualityLabel() {
-  const c = selectedPreset.crf;
-  const label = c <= 20 ? 'High quality' : c <= 26 ? 'Balanced' : 'Smaller file';
-  $('qualityVal').textContent = `${label} (CRF ${c})`;
-}
-
-$('customW').addEventListener('input', updateUI);
-$('customH').addEventListener('input', updateUI);
-
-function getTargetDims() {
-  if (isCustom) {
-    const w = parseInt($('customW').value)||null;
-    const h = parseInt($('customH').value)||null;
-    return { w, h };
-  }
-  return { w: selectedPreset.w, h: selectedPreset.h };
-}
-
-function updateUI() {
-  const { w, h } = getTargetDims();
-  const crf = selectedPreset.crf;
-  const hasFile = !!videoFile;
-
-  // Plan box
-  if (hasFile) {
-    $('planBox').style.display = 'block';
-    const dimStr = (w && h) ? `${videoMeta.w}×${videoMeta.h} → ${w}×${h}` : `${videoMeta.w}×${videoMeta.h} (no resize)`;
-    $('planText').innerHTML = `${dimStr} &nbsp;·&nbsp; CRF ${crf} quality &nbsp;·&nbsp; H.264 + AAC`;
-  } else {
-    $('planBox').style.display = 'none';
-  }
-
-  // Button
-  const btn = $('compressBtn');
-  if (!hasFile) { btn.disabled = true; btn.textContent = 'Select a video to begin'; }
-  else { btn.disabled = false; btn.textContent = 'Compress video'; }
-
-  // ffmpeg command
-  const inName = videoFile ? `"${videoFile.name}"` : '"input.mp4"';
-  const ext = videoFile ? videoFile.name.split('.').pop() : 'mp4';
-  const outName = videoFile ? `"compressed_${videoFile.name}"` : '"output.mp4"';
-  const scaleArg = (w && h) ? `-vf scale=${w}:${h} ` : '';
-  $('ffCmd').textContent = `ffmpeg -i ${inName} ${scaleArg}-c:v libx264 -crf ${crf} -preset slow -c:a aac -b:a 128k -movflags +faststart ${outName}`;
-}
-
-// Compress
-$('compressBtn').addEventListener('click', compress);
-
-async function compress() {
-  if (!videoFile) return;
-  const { w, h } = getTargetDims();
-  const crf = selectedPreset.crf;
-
-  $('compressBtn').disabled = true;
-  $('compressBtn').textContent = '⏳ Loading engine…';
-  $('progressWrap').style.display = 'block';
   $('resultBox').style.display = 'none';
+
   $('errorBox').style.display = 'none';
-  $('progressFill').style.width = '0%';
-  $('progressLabel').textContent = 'Loading ffmpeg engine (first run takes ~10 seconds)…';
-  $('progressLog').textContent = '';
 
-  try {
-    if (!ffmpeg) {
-      ffmpeg = new FFmpeg();
-      ffmpeg.on('log', ({ message }) => {
-        $('progressLog').textContent = message.slice(0, 80);
-        // Parse time progress from ffmpeg output
-        const m = message.match(/time=(\d+):(\d+):([\d.]+)/);
-        if (m && videoMeta.dur) {
-          const elapsed = parseInt(m[1])*3600 + parseInt(m[2])*60 + parseFloat(m[3]);
-          const pct = Math.min(95, Math.round((elapsed / videoMeta.dur) * 100));
-          $('progressFill').style.width = pct + '%';
-          $('progressLabel').textContent = `Compressing… ${pct}%`;
-          $('compressBtn').textContent = `⏳ ${pct}%`;
-        }
-      });
+  $('progressWrap').style.display = 'none';
 
-      const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
-      await ffmpeg.load({
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-      });
+  const url = URL.createObjectURL(f);
+
+  const v = document.createElement('video');
+
+  v.preload = 'metadata';
+
+  v.onloadedmetadata = () => {
+
+    videoMeta.w = v.videoWidth;
+
+    videoMeta.h = v.videoHeight;
+
+    videoMeta.dur = v.duration;
+
+    URL.revokeObjectURL(url);
+
+    $('metaDims').textContent = `${videoMeta.w}×${videoMeta.h}`;
+
+    $('metaSize').textContent = fmt(videoMeta.size);
+
+    $('metaDur').textContent = fmtDur(videoMeta.dur);
+
+    $('metaBar').style.display = 'block';
+
+    $('dropTitle').textContent = f.name;
+
+    $('dropSub').textContent = `${videoMeta.w}×${videoMeta.h} · ${fmt(videoMeta.size)} · ${fmtDur(videoMeta.dur)}`;
+
+    updateUI();
+
+  };
+
+  v.onerror = () => {
+
+    URL.revokeObjectURL(url);
+
+    $('dropTitle').textContent = f.name;
+
+    $('dropSub').textContent = `${fmt(f.size)} — could not read dimensions`;
+
+    updateUI();
+
+  };
+
+  v.src = url;
+
+}
+ 
+// Presets
+
+document.querySelectorAll('.preset-btn').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+
+    btn.classList.add('active');
+
+    const w = btn.dataset.w, h = btn.dataset.h;
+
+    isCustom = w === 'custom';
+
+    $('customDims').classList.toggle('show', isCustom);
+
+    if (!isCustom) {
+
+      selectedPreset.w = w ? parseInt(w) : null;
+
+      selectedPreset.h = h ? parseInt(h) : null;
+
+      selectedPreset.crf = parseInt(btn.dataset.crf);
+
+      $('crfSlider').value = selectedPreset.crf;
+
+      updateQualityLabel();
+
     }
 
-    $('progressLabel').textContent = 'Reading your video…';
-    $('progressFill').style.width = '5%';
-    $('compressBtn').textContent = '⏳ Processing…';
+    updateUI();
 
-    const ext = videoFile.name.split('.').pop().toLowerCase() || 'mp4';
-    const inName = `input.${ext}`;
-    const outName = `output.mp4`;
+  });
 
-    await ffmpeg.writeFile(inName, await fetchFile(videoFile));
+});
+ 
+// Quality slider
 
-    const args = ['-i', inName];
-    if (w && h) { args.push('-vf', `scale=${w}:${h}`); }
-    args.push('-c:v', 'libx264', '-crf', String(crf), '-preset', 'fast', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', outName);
+$('crfSlider').addEventListener('input', e => {
 
-    $('progressLabel').textContent = 'Compressing… (this may take 1–3 minutes for large files)';
-    await ffmpeg.exec(args);
+  selectedPreset.crf = parseInt(e.target.value);
 
-    $('progressFill').style.width = '100%';
-    $('progressLabel').textContent = 'Done!';
+  updateQualityLabel();
 
-    const data = await ffmpeg.readFile(outName);
-    const blob = new Blob([data.buffer], { type: 'video/mp4' });
-    outputBlob = blob;
+  updateUI();
 
-    const reduction = Math.round((1 - blob.size / videoFile.size) * 100);
-    const outLabel = (w && h) ? `${w}×${h}` : `${videoMeta.w}×${videoMeta.h}`;
-    $('resultSub').textContent = `${fmt(videoFile.size)} → ${fmt(blob.size)} · ${reduction}% smaller · ${outLabel}`;
-    $('resultBox').style.display = 'block';
-    $('progressWrap').style.display = 'none';
-    $('compressBtn').disabled = false;
-    $('compressBtn').textContent = 'Compress another';
+});
+ 
+function updateQualityLabel() {
 
-    // Setup download
-    $('dlBtn').onclick = () => {
-      const url = URL.createObjectURL(outputBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `compressed_${videoFile.name.replace(/\.[^.]+$/, '')}.mp4`;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
-    };
+  const c = selectedPreset.crf;
 
-    // Cleanup
-    await ffmpeg.deleteFile(inName);
-    await ffmpeg.deleteFile(outName);
+  const label = c <= 20 ? 'High quality' : c <= 26 ? 'Balanced' : 'Smaller file';
 
-  } catch(err) {
-    console.error(err);
-    $('errorBox').style.display = 'block';
-    $('errorBox').textContent = `Something went wrong: ${err.message}. Try a different browser (Chrome works best), or use the ffmpeg command below.`;
-    $('progressWrap').style.display = 'none';
-    $('compressBtn').disabled = false;
-    $('compressBtn').textContent = 'Compress video';
-  }
+  $('qualityVal').textContent = `${label} (CRF ${c})`;
+
 }
+ 
+$('customW').addEventListener('input', updateUI);
 
+$('customH').addEventListener('input', updateUI);
+ 
+function getTargetDims() {
+
+  if (isCustom) {
+
+    const w = parseInt($('customW').value)||null;
+
+    const h = parseInt($('customH').value)||null;
+
+    return { w, h };
+
+  }
+
+  return { w: selectedPreset.w, h: selectedPreset.h };
+
+}
+ 
+function showError(msg) {
+
+  $('errorBox').style.display = 'block';
+
+  $('errorBox').innerHTML = msg;
+
+}
+ 
+function updateUI() {
+
+  const { w, h } = getTargetDims();
+
+  const crf = selectedPreset.crf;
+
+  const hasFile = !!videoFile;
+ 
+  if (hasFile) {
+
+    $('planBox').style.display = 'block';
+
+    const dimStr = (w && h) ? `${videoMeta.w}×${videoMeta.h} → ${w}×${h}` : `${videoMeta.w}×${videoMeta.h} (no resize)`;
+
+    $('planText').innerHTML = `${dimStr} &nbsp;·&nbsp; CRF ${crf} quality &nbsp;·&nbsp; H.264 + AAC`;
+
+  } else {
+
+    $('planBox').style.display = 'none';
+
+  }
+ 
+  const btn = $('compressBtn');
+
+  if (!hasFile) { btn.disabled = true; btn.textContent = 'Select a video to begin'; }
+
+  else { btn.disabled = false; btn.textContent = 'Compress video'; }
+ 
+  const inName = videoFile ? `"${videoFile.name}"` : '"input.mp4"';
+
+  const outBase = videoFile ? videoFile.name.replace(/\.[^.]+$/, '') : 'output';
+
+  const outName = `"compressed_${outBase}.mp4"`;
+
+  const scaleArg = (w && h) ? `-vf scale=${w}:${h} ` : '';
+
+  $('ffCmd').textContent = `ffmpeg -i ${inName} ${scaleArg}-c:v libx264 -crf ${crf} -preset fast -c:a aac -b:a 128k -movflags +faststart ${outName}`;
+
+}
+ 
+// Compress
+
+$('compressBtn').addEventListener('click', compress);
+ 
+async function compress() {
+
+  if (!videoFile) return;
+
+  const { w, h } = getTargetDims();
+
+  const crf = selectedPreset.crf;
+ 
+  $('compressBtn').disabled = true;
+
+  $('compressBtn').textContent = '⏳ Loading engine…';
+
+  $('progressWrap').style.display = 'block';
+
+  $('resultBox').style.display = 'none';
+
+  $('errorBox').style.display = 'none';
+
+  $('progressFill').style.width = '0%';
+
+  $('progressLabel').textContent = 'Loading ffmpeg engine (first run takes ~10 seconds)…';
+
+  $('progressLog').textContent = '';
+ 
+  try {
+
+    if (!ffmpeg) {
+
+      ffmpeg = new FFmpeg();
+
+      ffmpeg.on('log', ({ message }) => {
+
+        $('progressLog').textContent = message.slice(0, 80);
+
+        const m = message.match(/time=(\d+):(\d+):([\d.]+)/);
+
+        if (m && videoMeta.dur) {
+
+          const elapsed = parseInt(m[1])*3600 + parseInt(m[2])*60 + parseFloat(m[3]);
+
+          const pct = Math.min(95, Math.round((elapsed / videoMeta.dur) * 100));
+
+          $('progressFill').style.width = pct + '%';
+
+          $('progressLabel').textContent = `Compressing… ${pct}%`;
+
+          $('compressBtn').textContent = `⏳ ${pct}%`;
+
+        }
+
+      });
+ 
+      const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+
+      await ffmpeg.load({
+
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+
+      });
+
+    }
+ 
+    $('progressLabel').textContent = 'Reading your video…';
+
+    $('progressFill').style.width = '5%';
+
+    $('compressBtn').textContent = '⏳ Processing…';
+ 
+    const ext = (videoFile.name.split('.').pop() || 'mp4').toLowerCase();
+
+    const inName = `input.${ext}`;
+
+    const outName = 'output.mp4';
+ 
+    await ffmpeg.writeFile(inName, await fetchFile(videoFile));
+ 
+    const args = ['-i', inName];
+
+    if (w && h) { args.push('-vf', `scale=${w}:${h}`); }
+
+    args.push('-c:v', 'libx264', '-crf', String(crf), '-preset', 'fast', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', outName);
+ 
+    $('progressLabel').textContent = 'Compressing… (this may take 1–3 minutes for large files)';
+
+    await ffmpeg.exec(args);
+ 
+    $('progressFill').style.width = '100%';
+
+    $('progressLabel').textContent = 'Done!';
+ 
+    const data = await ffmpeg.readFile(outName);
+
+    const blob = new Blob([data.buffer], { type: 'video/mp4' });
+
+    outputBlob = blob;
+ 
+    const reduction = Math.round((1 - blob.size / videoFile.size) * 100);
+
+    const outLabel = (w && h) ? `${w}×${h}` : `${videoMeta.w}×${videoMeta.h}`;
+
+    $('resultSub').textContent = `${fmt(videoFile.size)} → ${fmt(blob.size)} · ${reduction}% smaller · ${outLabel}`;
+
+    $('resultBox').style.display = 'block';
+
+    $('progressWrap').style.display = 'none';
+
+    $('compressBtn').disabled = false;
+
+    $('compressBtn').textContent = 'Compress another';
+ 
+    $('dlBtn').onclick = () => {
+
+      const url = URL.createObjectURL(outputBlob);
+
+      const a = document.createElement('a');
+
+      a.href = url;
+
+      a.download = `compressed_${videoFile.name.replace(/\.[^.]+$/, '')}.mp4`;
+
+      document.body.appendChild(a);
+
+      a.click();
+
+      document.body.removeChild(a);
+
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    };
+ 
+    await ffmpeg.deleteFile(inName);
+
+    await ffmpeg.deleteFile(outName);
+ 
+  } catch(err) {
+
+    console.error(err);
+
+    $('progressWrap').style.display = 'none';
+
+    $('compressBtn').disabled = false;
+
+    $('compressBtn').textContent = 'Compress video';
+
+    let msg = '<strong>Compression failed.</strong><br>';
+
+    msg += `Error: ${err && err.message ? err.message : err}<br><br>`;
+
+    msg += 'If this keeps happening, try Chrome, or use the ffmpeg command at the bottom of the page.';
+
+    showError(msg);
+
+  }
+
+}
+ 
 updateUI();
 </script>
 </body>
