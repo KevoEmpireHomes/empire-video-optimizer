@@ -11,8 +11,8 @@ index.html            The whole app (UI + logic, no build step)
 _headers              COOP/COEP headers (required, see below)
 vendor/               Vendored ffmpeg.wasm assets, served same-origin
   ffmpeg/             @ffmpeg/ffmpeg 0.12.10 (JS wrapper + worker chunk)
-  core/               @ffmpeg/core 0.12.6 (single-threaded wasm core)
-  CHECKSUMS.txt       sha256 of every vendored file
+  core/               @ffmpeg/core 0.12.6 (JS core + gzipped wasm)
+  CHECKSUMS.txt       sha256 of the raw upstream artifacts
 scripts/
   vendor-ffmpeg.sh    Re-download + checksum-verify the vendored assets
 ```
@@ -25,6 +25,14 @@ cross-origin, and browsers refuse to construct a `Worker` from a cross-origin UR
 (`Failed to construct 'Worker'`). Serving the files same-origin from `vendor/` makes
 the worker same-origin and fixes this. It also removes a runtime dependency on a
 third-party CDN and pins exactly what ships.
+
+## Why the wasm ships gzipped
+
+Cloudflare Pages caps individual files at 25 MiB, and the raw core wasm is ~30.6 MiB.
+It ships as `vendor/core/ffmpeg-core.wasm.gz` (~9.7 MiB) and `index.html` inflates it in
+the browser with `DecompressionStream` into a same-origin blob URL before loading. The
+file must be served as an opaque binary (Cloudflare Pages does this for `.gz`); it must
+**not** be served with `Content-Encoding: gzip`, or the browser would double-decompress.
 
 ## Cross-origin isolation
 
@@ -48,9 +56,6 @@ npx serve .        # or: python3 -m http.server 8080
 ./scripts/vendor-ffmpeg.sh
 ```
 
-To bump a version, edit the version variables at the top of that script, run it, then
-regenerate the checksums:
-
-```
-shasum -a 256 vendor/ffmpeg/*.js vendor/core/* > vendor/CHECKSUMS.txt
-```
+To bump a version, edit the version variables at the top of that script, refresh the raw
+hashes in `vendor/CHECKSUMS.txt`, then run the script. It re-downloads, verifies the raw
+artifacts, and regenerates the gzipped wasm.

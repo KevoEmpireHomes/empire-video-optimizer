@@ -255,6 +255,22 @@ window.FFmpegUtil = {
 
     return new Uint8Array(await (await fetch(file)).arrayBuffer());
 
+  },
+
+  // Fetch a gzipped asset, inflate it in the browser, and hand back a same-origin
+  // blob: URL. The ffmpeg core wasm ships gzipped so it stays under Cloudflare Pages'
+  // 25 MiB per-file limit (30.6 MiB raw -> ~9.7 MiB gzipped).
+
+  gunzipToBlobURL: async (url, mimeType) => {
+
+    const res = await fetch(url);
+
+    const stream = res.body.pipeThrough(new DecompressionStream('gzip'));
+
+    const buf = await new Response(stream).arrayBuffer();
+
+    return URL.createObjectURL(new Blob([buf], { type: mimeType }));
+
   }
 
 };
@@ -263,7 +279,7 @@ window.FFmpegUtil = {
 
 const { FFmpeg } = FFmpegWASM;
 
-const { fetchFile } = FFmpegUtil;
+const { fetchFile, gunzipToBlobURL } = FFmpegUtil;
  
 let ffmpeg = null;
 
@@ -567,14 +583,17 @@ async function compress() {
 
       });
  
-      // Vendored, same-origin core. Absolute URLs so the worker resolves them regardless of its own location.
+      // Vendored, same-origin core. The wasm ships gzipped (Cloudflare Pages caps files
+      // at 25 MiB); inflate it in the browser into a same-origin blob URL.
       const coreBase = new URL('vendor/core/', location.href).href;
+
+      const wasmURL = await gunzipToBlobURL(`${coreBase}ffmpeg-core.wasm.gz`, 'application/wasm');
 
       await ffmpeg.load({
 
         coreURL: `${coreBase}ffmpeg-core.js`,
 
-        wasmURL: `${coreBase}ffmpeg-core.wasm`,
+        wasmURL,
 
       });
 
