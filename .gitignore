@@ -1,0 +1,15 @@
+# Editor / agent tooling
+.claude/
+.vscode/
+.idea/
+
+# OS cruft
+.DS_Store
+
+# Node / wrangler
+node_modules/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

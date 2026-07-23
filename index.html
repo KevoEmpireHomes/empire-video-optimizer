@@ -234,9 +234,11 @@ input[type=range]{width:100%;accent-color:#e06344;margin-bottom:4px}
   <div class="footer">Empire Homes · Video Optimizer · Processing happens entirely in your browser — videos are never uploaded anywhere</div>
 </div>
  
-<!-- ffmpeg.wasm engine (this UMD bundle is browser-ready and defines FFmpegWASM) -->
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/umd/ffmpeg.js"></script>
-<!-- @ffmpeg/util's published UMD build is broken in browsers (it uses require()), so we define the two helpers we need inline instead -->
+<!-- ffmpeg.wasm engine, vendored locally under vendor/ so it loads same-origin. Defines FFmpegWASM.
+     Same-origin matters: the UMD build spawns its worker (814.ffmpeg.js) relative to this
+     script, and browsers forbid constructing a Worker from a cross-origin (CDN) URL. -->
+<script src="vendor/ffmpeg/ffmpeg.js"></script>
+<!-- @ffmpeg/util's published UMD build is broken in browsers (it uses require()), so we define the one helper we need inline instead -->
 <script>
 
 window.FFmpegUtil = {
@@ -253,16 +255,6 @@ window.FFmpegUtil = {
 
     return new Uint8Array(await (await fetch(file)).arrayBuffer());
 
-  },
-
-  // Fetch a URL and hand back a blob: URL — used to load the ffmpeg core
-
-  toBlobURL: async (url, mimeType) => {
-
-    const buf = await (await fetch(url)).arrayBuffer();
-
-    return URL.createObjectURL(new Blob([buf], { type: mimeType }));
-
   }
 
 };
@@ -271,7 +263,7 @@ window.FFmpegUtil = {
 
 const { FFmpeg } = FFmpegWASM;
 
-const { fetchFile, toBlobURL } = FFmpegUtil;
+const { fetchFile } = FFmpegUtil;
  
 let ffmpeg = null;
 
@@ -575,13 +567,14 @@ async function compress() {
 
       });
  
-      const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+      // Vendored, same-origin core. Absolute URLs so the worker resolves them regardless of its own location.
+      const coreBase = new URL('vendor/core/', location.href).href;
 
       await ffmpeg.load({
 
-        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        coreURL: `${coreBase}ffmpeg-core.js`,
 
-        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+        wasmURL: `${coreBase}ffmpeg-core.wasm`,
 
       });
 
