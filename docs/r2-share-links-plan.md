@@ -1,7 +1,7 @@
 # Planning Doc: R2 Share Links for the Video Optimizer
 
 **Status:** Ready for implementation
-**Owner (implementer):** Empire dev
+**Owner (implementer):** Kevin Appiah
 **Prepared by:** ZeroArc (AI Labs)
 **Last updated:** 2026-07-24
 
@@ -17,6 +17,18 @@ Add an optional "Get share link" step to the existing browser-based video
 optimizer. After a user compresses a video locally, they can upload the
 **compressed result** to Cloudflare R2 and receive a private, expiring link they
 can send to a client. Uploaded files auto-delete after 24 hours.
+
+> **Dev environment constraint (read first).** The Empire team cannot install
+> wrangler on their managed devices. They write code and deploy through the
+> **GitHub -> Cloudflare Pages Git integration** only. This plan is built around
+> that: no local wrangler, no local secrets. All credential and infra setup is
+> done by ZeroArc in the Cloudflare dashboard; the dev iterates on **Pages
+> preview deployments**. See §11 for the full loop.
+>
+> Production is live at **https://video-optimizer.empireailab.com** (custom
+> domain). Only a **Production** environment exists today; a **Preview**
+> environment (env vars + preview builds) needs to be stood up so the dev can
+> test (§6.5, §11).
 
 ## 2. What stays the same (do not touch)
 
@@ -93,23 +105,29 @@ These are one-time setup steps done in the Cloudflare dashboard or via wrangler.
 Daniel (ZeroArc) will provision, or grant the dev scoped access. Record these in
 the project ticket for the SOC 2 paper trail.
 
-1. **R2 bucket** — e.g. `empire-video-optimizer`. Keep it **private** (do not
-   enable public r2.dev access).
+1. **R2 bucket** — `empire-video-optimizer`, kept **private** (do not enable
+   public r2.dev access). A single bucket serves both production and preview
+   traffic. This is an internal demo, so preview test uploads sharing the
+   production bucket is acceptable; the 24h lifecycle cleans both up the same way.
 
 2. **R2 API token** — scoped to **Object Read & Write on that one bucket only**
-   (least privilege). This yields an **Access Key ID** and **Secret Access Key**
-   plus the **Account ID**. Treat the secret like any other credential: never
-   commit it, never log it.
+   (least privilege). Yields an **Access Key ID** and **Secret Access Key**; note
+   the **Account ID** too. Treat secrets like any other credential: never commit,
+   never log. These values only ever go into the dashboard env vars (§6.5), never
+   to the Empire team.
 
 3. **Bucket CORS policy** — required so the browser can PUT directly to R2.
-   Restrict the origin to the Pages domain (and the local dev origin during
-   development). Example:
+   Restrict to the production custom domain plus the preview subdomains. R2
+   follows S3 wildcard semantics, so a single `*` label covers both branch
+   aliases (`branch.<project>.pages.dev`) and per-commit preview URLs
+   (`<hash>.<project>.pages.dev`). No `localhost` entry, there is no local dev.
+   Replace `<project>` with the actual `*.pages.dev` project name.
    ```json
    [
      {
        "AllowedOrigins": [
-         "https://<project>.pages.dev",
-         "http://localhost:8788"
+         "https://video-optimizer.empireailab.com",
+         "https://*.<project>.pages.dev"
        ],
        "AllowedMethods": ["PUT", "GET"],
        "AllowedHeaders": ["content-type"],
@@ -124,18 +142,25 @@ the project ticket for the SOC 2 paper trail.
    day-granular, so 24 hours maps to exactly one rule with no custom cron. This
    is the cleanup mechanism; do not build a separate delete job.
 
-5. **Pages secrets** — set on the Pages project (Production and Preview):
+5. **Environment variables / secrets** — set in the **Cloudflare dashboard**
+   (Pages project > Settings > Environment variables), **not** via
+   `wrangler pages secret`. The Empire team cannot run wrangler, and this keeps
+   the credentials off their machines entirely. Set the same four keys under
+   **both** the Production and Preview environments (mark the two credential
+   values as encrypted/Secret). The values are **identical** across the two
+   environments (same bucket, same token):
    - `R2_ACCOUNT_ID`
    - `R2_ACCESS_KEY_ID`
    - `R2_SECRET_ACCESS_KEY`
-   - `R2_BUCKET` (bucket name, can also be a plain var)
+   - `R2_BUCKET` (plain var, `empire-video-optimizer`)
 
-   Set via dashboard (Settings > Environment variables, mark as encrypted) or
-   `wrangler pages secret put R2_ACCESS_KEY_ID`.
+   Only a Production environment exists today, so the Preview environment has to
+   be created here. Preview deploys need these vars present or the Function errors
+   out; that is the only reason to duplicate them into Preview (§11). The dev
+   never sees these values.
 
-   Optional alternative: an **R2 binding** in `wrangler.toml` gives the Function
-   direct bucket access, but presigning still needs the raw S3 credentials, so
-   secrets are required regardless. Use secrets.
+   Note: an R2 binding alone is not enough. Presigning requires the raw S3
+   credentials, so these secrets are required regardless.
 
 ## 7. Server-side endpoint
 
@@ -239,20 +264,49 @@ go to R2. Update copy so it is accurate:
 - **Bounded input:** enforce a max file size and validate content type server-side.
 - **Paper trail:** record bucket name, token creation, CORS, and lifecycle rule
   in the project ticket.
-- Consider a light rate limit or Turnstile on `/api/create-share` if the demo is
-  ever exposed beyond the Empire team (future, see below).
+- **The endpoint is publicly reachable.** Production is a public custom domain
+  (`video-optimizer.empireailab.com`), so `/api/create-share` can be hit by
+  anyone who finds it. The file-size cap and content-type validation (§7) are the
+  first line of defense against someone using it to mint R2 upload URLs for
+  arbitrary content. A light rate limit or Turnstile is worth adding before this
+  goes past demo use (§12).
 
-## 11. Local development
+## 11. Dev and deploy workflow (wrangler-free)
 
-- `npx wrangler pages dev .` serves the static site and Functions together and
-  loads local secrets from a `.dev.vars` file (git-ignored). Populate `.dev.vars`
-  with the four R2 values.
-- Add `http://localhost:8788` (the wrangler pages dev origin) to the bucket CORS
-  allowed origins during development.
-- Test the full path: compress a small clip, click share, confirm the PUT lands
-  in R2, open the share URL in an incognito window, confirm it downloads, then
-  confirm the object disappears after the lifecycle window (or delete manually
-  to verify the flow).
+The Empire team cannot install wrangler on their managed devices, so there is no
+`wrangler pages dev` and no local `.dev.vars`. The entire loop runs through the
+GitHub -> Cloudflare Pages Git integration.
+
+**How the dev works:**
+- Push a feature branch to GitHub. The Pages Git integration automatically builds
+  a **preview deployment** at `https://<branch>.<project>.pages.dev` (plus a
+  per-commit URL).
+- During that build, Cloudflare runs the dependency install, so `aws4fetch` from
+  `package.json` is available to the Function. No local node/wrangler needed.
+- Open the preview URL and test the real flow there. Because the static page and
+  the `/api/create-share` Function are served from the same preview origin, the
+  API call is same-origin and needs no extra CORS handling. The browser -> R2 PUT
+  is the only cross-origin hop, covered by the bucket CORS in §6.3.
+- Merge to the production branch to deploy to
+  `https://video-optimizer.empireailab.com`.
+
+**One-time setup (ZeroArc, dashboard):**
+- Stand up the **Preview** environment variables (§6.5); only Production exists
+  today. Without Preview env vars the Function will fail on preview deploys.
+- Confirm preview builds are enabled for non-production branches in the Pages
+  project (Settings > Builds & deployments).
+
+**Test checklist (on a preview deploy):**
+- Compress a small clip, click Get share link, confirm the PUT lands in the
+  bucket (under the `shared/` prefix).
+- Open the share URL in an incognito window, confirm it downloads with the right
+  filename.
+- Confirm the object is gone after the 24h lifecycle window (or delete manually
+  to re-verify the flow).
+
+**Iteration note:** because there is no local server, each change is validated by
+pushing and waiting for the preview build. Batch changes to keep the loop
+efficient.
 
 ## 12. Out of scope / future
 
@@ -265,11 +319,17 @@ go to R2. Update copy so it is accurate:
 
 ## 13. Implementation checklist
 
-- [ ] Provision R2 bucket, scoped API token, CORS, and 24h lifecycle rule (§6)
-- [ ] Add the four Pages secrets (and local `.dev.vars`) (§6.5, §11)
-- [ ] Add `aws4fetch` dependency and `functions/api/create-share` endpoint (§7)
+**ZeroArc (dashboard/CLI, off the Empire team's machines):**
+- [ ] Create the R2 bucket, private (§6.1)
+- [ ] Create a scoped Object R/W token for the bucket (§6.2)
+- [ ] Set CORS (custom domain + `*.pages.dev`) and 24h lifecycle on the bucket (§6.3, §6.4)
+- [ ] Set the four env vars under **both** Production and Preview in the Pages dashboard (§6.5)
+- [ ] Stand up the Preview environment and confirm preview builds are on (§11)
+
+**Empire dev (via GitHub -> Pages Git integration):**
+- [ ] Add `package.json` with `aws4fetch` and the `functions/api/create-share` endpoint (§7)
 - [ ] Wire the "Get share link" button and upload flow in `index.html` (§8)
 - [ ] Update UI copy and README for accuracy (§9)
-- [ ] Test end to end locally, then on a Pages preview deploy (§11)
+- [ ] Test end to end on a preview deploy, then merge to production (§11)
 - [ ] Verify the object is gone after 24h (lifecycle) (§11)
 ```
