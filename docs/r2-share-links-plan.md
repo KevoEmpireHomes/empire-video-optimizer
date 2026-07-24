@@ -278,15 +278,17 @@ The Empire team cannot install wrangler on their managed devices, so there is no
 GitHub -> Cloudflare Pages Git integration.
 
 **How the dev works:**
-- Push a feature branch to GitHub. The Pages Git integration automatically builds
-  a **preview deployment** at `https://<branch>.<project>.pages.dev` (plus a
-  per-commit URL).
-- Pages auto-detects and builds the `functions/` directory. No dependencies, so
-  nothing to install; no local node or wrangler needed.
-- Open the preview URL and test the real flow there. The static page, `/api/share`,
-  and `/s/...` are all served from the same origin, so everything is same-origin
-  with no CORS involved.
-- Merge to the production branch to deploy to
+- Work on the `feature/r2-video-storage` branch and **open a PR** against the
+  production branch early. Keep it open (draft is fine); **do not merge until it
+  is ready.** The PR is how the preview link surfaces: Cloudflare posts the
+  preview deployment URL on the PR.
+- Each commit pushed to the branch triggers a new Pages **preview build**. Pages
+  auto-detects and builds the `functions/` directory. No dependencies, so nothing
+  to install; no local node or wrangler needed.
+- Open the preview URL from the PR and test the real flow there. The static page,
+  `/api/share`, and `/s/...` are all served from the same origin, so everything is
+  same-origin with no CORS involved.
+- When it is reviewed and working, **merge the PR** to deploy to production at
   `https://video-optimizer.empireailab.com`.
 
 **One-time setup (ZeroArc, dashboard):**
